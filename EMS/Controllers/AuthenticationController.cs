@@ -43,26 +43,26 @@ public class AuthenticationController : ControllerBase
 
     [AllowAnonymous]        
     [HttpPost("Login")]
-    public ApiResponse<string> Login(LoginDTO loginDTO)
+    public async Task<ApiResponse<string>> Login(LoginDTO loginDTO)
     {
-        var isAuthenticated = _authenticationService.Authenticate(loginDTO.Email, loginDTO.Password);
+        var isAuthenticated = await _authenticationService.Authenticate(loginDTO.Email, loginDTO.Password);
         if (!isAuthenticated)
         {
             _logger.LogError("Invalid email or password");
             return GenerateResponse<string>(null, ResponseStatus.Fail, ErrorCode.UnAuthorized);
         }
-        var employeeDetail = _authenticationService.GetEmployeeByEmail(loginDTO.Email);
+        var employeeDetail = await _authenticationService.GetEmployeeByEmail(loginDTO.Email);
         if (employeeDetail == null)
         {
             return GenerateResponse<string>(null, ResponseStatus.Fail, ErrorCode.NotFound);
         }
-        var tokenString = GenerateToken(employeeDetail.Id, employeeDetail.Email);
+        var tokenString = await GenerateToken(employeeDetail.Id, employeeDetail.Email, employeeDetail.RoleName);
         return GenerateResponse(tokenString);
     }
 
     [AllowAnonymous]
     [HttpPost("Register")]
-    public ApiResponse<int> Register(RegisterDTO registerEmp)
+    public async Task<ApiResponse<int>> Register(RegisterDTO registerEmp)
     {
         try
         {
@@ -70,7 +70,7 @@ public class AuthenticationController : ControllerBase
             {
                 return GenerateResponse(0, ResponseStatus.Error, ErrorCode.ValidationFailed);
             }
-            var id = _authenticationService.RegisterEmployee(registerEmp);
+            var id = await _authenticationService.RegisterEmployee(registerEmp);
             return GenerateResponse(id);
         }
         catch (Exception ex)
@@ -80,12 +80,13 @@ public class AuthenticationController : ControllerBase
         }
     }
 
-    private string GenerateToken(int id, string email)
+    private async Task<string> GenerateToken(int id, string email, string role)
     {
         List<Claim> claims = new List<Claim>()
         {
             new Claim(ClaimTypes.Email, email),
-            new Claim("Id", id.ToString()) 
+            new Claim("Id", id.ToString()),
+            new Claim("role", role)
         };
 
         var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]));

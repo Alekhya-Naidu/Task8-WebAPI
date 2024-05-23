@@ -45,11 +45,11 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpGet]
-    public ApiResponse<PaginatedResult<EmployeeDetail>> GetAllEmployee([FromQuery] int pageIndex, [FromQuery] int pageSize)
+    public async Task<ApiResponse<PaginatedResult<EmployeeDetail>>> GetAllEmployee([FromQuery] int pageIndex, [FromQuery] int pageSize)
     {
         try
         {
-            var employees = _employeeService.GetAll(pageIndex, pageSize);
+            var employees = await _employeeService.GetAll(pageIndex, pageSize);
             return GenerateResponse(employees);
         }
         catch (Exception ex)
@@ -61,7 +61,7 @@ public class EmployeeController : ControllerBase
 
     [Authorize]
     [HttpGet("{id}")]
-    public ApiResponse<IEnumerable<EmployeeDetail>> GetEmployee(int id)
+    public async Task<ApiResponse<IEnumerable<EmployeeDetail>>> GetEmployee(int id)
     {
         try
         {
@@ -72,7 +72,7 @@ public class EmployeeController : ControllerBase
             }
             if (userId == id)
             {
-                var employee = _employeeService.GetEmployeeById(id);
+                var employee = await _employeeService.GetEmployeeById(id);
                 if (employee == null)
                 {
                     return GenerateResponse<IEnumerable<EmployeeDetail>>(null, ResponseStatus.Error, ErrorCode.NotFound);
@@ -91,8 +91,9 @@ public class EmployeeController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Administrator")]
     [HttpPost]
-    public ApiResponse<int> CreateEmployee(EmployeeDetail employeeDetail)
+    public async Task<ApiResponse<int>> CreateEmployee(EmployeeDetail employeeDetail)
     {
         try
         {
@@ -100,7 +101,7 @@ public class EmployeeController : ControllerBase
             {
                 return GenerateResponse(0, ResponseStatus.Error, ErrorCode.ValidationFailed);
             }
-            var empId = _employeeService.Insert(employeeDetail);
+            var empId = await _employeeService.Insert(employeeDetail);
             if(empId > 0)
             {
                 return GenerateResponse(empId);
@@ -119,7 +120,7 @@ public class EmployeeController : ControllerBase
 
     [Authorize]
     [HttpPut("{id}")]
-    public ApiResponse<int> UpdateEmployee(int id, EmployeeDetail employeeDetail)
+    public async Task<ApiResponse<int>> UpdateEmployee(int id, EmployeeDetail employeeDetail)
     {
         try
         {
@@ -131,7 +132,7 @@ public class EmployeeController : ControllerBase
             {
                 return GenerateResponse(0, ResponseStatus.Error, ErrorCode.ValidationFailed);
             }
-            var rowsAffected = _employeeService.Update(employeeDetail);
+            var rowsAffected = await _employeeService.Update(employeeDetail);
             if (rowsAffected > 0)
             {
                 return GenerateResponse<int>(rowsAffected);
@@ -150,11 +151,11 @@ public class EmployeeController : ControllerBase
 
     [Authorize]
     [HttpPatch("{id}")]
-    public ApiResponse<int> UpdateRow(int id, [FromBody] JsonPatchDocument<EmployeeDetail> patchDocument)
+    public async Task<ApiResponse<int>> UpdateRow(int id, [FromBody] JsonPatchDocument<EmployeeDetail> patchDocument)
     {
         try
         {
-            var rowsAffected = _employeeService.UpdateRow(id, patchDocument);
+            var rowsAffected = await _employeeService.UpdateRow(id, patchDocument);
             if (rowsAffected > 0)
             {
                 return GenerateResponse(rowsAffected);
@@ -173,11 +174,11 @@ public class EmployeeController : ControllerBase
 
     [Authorize]
     [HttpDelete("{id}")]
-    public ApiResponse<int> DeleteEmployee(int id)
+    public async Task<ApiResponse<int>> DeleteEmployee(int id)
     {
         try
         {
-            var employee = _employeeService.Delete(id);
+            var employee = await _employeeService.Delete(id);
             if (employee > 0)
             {
                 return GenerateResponse(0);
@@ -195,11 +196,11 @@ public class EmployeeController : ControllerBase
     }
 
     [HttpGet("filter")]
-    public ApiResponse<IEnumerable<EmployeeDetail>> FilterEmployees([FromQuery] EmployeeFilter filters)
+    public async Task<ApiResponse<IEnumerable<EmployeeDetail>>> FilterEmployees([FromQuery] EmployeeFilter filters)
     {
         try
         {
-            var filteredEmployees = _employeeService.Filter(filters);
+            var filteredEmployees = await _employeeService.Filter(filters);
             return GenerateResponse(filteredEmployees);
         }
         catch (Exception ex)
@@ -208,5 +209,4 @@ public class EmployeeController : ControllerBase
             return GenerateResponse<IEnumerable<EmployeeDetail>>(null, ResponseStatus.Error, ErrorCode.InternalServerError);
         }
     }
-
 }

@@ -15,24 +15,24 @@ public class RolesService : IRolesService
         _rolesRepo = rolesRepo;
     }
 
-    public IEnumerable<Role> GetAllRoles()
+    public async Task<IEnumerable<Role>> GetAllRoles()
     {
-        return _rolesRepo.GetAllRoles();
+        return await _rolesRepo.GetAllRoles();
     }
 
-    public Role GetRoleFromName(string roleName)
+    public async Task<Role> GetRoleFromName(string roleName)
     {
-        return _rolesRepo.GetRoleFromName(roleName);
-    }
-    
-    public Role GetRoleById(int roleId)
-    {
-        return _rolesRepo.GetRoleById(roleId);
+        return await _rolesRepo.GetRoleFromName(roleName);
     }
 
-    public int AddRole(Role role)
+    public async Task<Role> GetRoleById(int id)
     {
-        return _rolesRepo.AddRole(role);
+        return await _rolesRepo.GetRoleById(id);
+    }
+
+    public async Task<int> AddRole(Role role)
+    {
+        return await _rolesRepo.AddRole(role);
     }
 }
 

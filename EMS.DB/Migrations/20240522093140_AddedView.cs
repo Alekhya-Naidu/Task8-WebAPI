@@ -5,10 +5,9 @@
 namespace EMS.DB.Migrations
 {
     /// <inheritdoc />
-    public partial class EmployeeDetailView : Migration
+    public partial class AddedView : Migration
     {
         /// <inheritdoc />
-      
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(
@@ -28,6 +27,7 @@ namespace EMS.DB.Migrations
                 LEFT JOIN Projects p ON e.ProjectId = p.Id
                 LEFT JOIN Employees m ON e.ManagerId = m.Id;
             ");
+
         }
 
         /// <inheritdoc />

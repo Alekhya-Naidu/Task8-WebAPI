@@ -15,25 +15,25 @@ public class RolesRepository : IRolesRepository
         _dbContext = dbContext;
     }
 
-    public IEnumerable<Role> GetAllRoles()
+    public async Task<IEnumerable<Role>> GetAllRoles()
     {
-        return _dbContext.Roles.ToList();
+        return await _dbContext.Roles.ToListAsync();
     }
 
-    public Role GetRoleFromName(string roleName)
+    public async Task<Role> GetRoleFromName(string roleName)
     {
-        return _dbContext.Roles.FirstOrDefault(r => r.Name == roleName);
+        return await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
     }
 
-    public Role GetRoleById(int roleId)
+    public async Task<Role> GetRoleById(int id)
     {
-        return _dbContext.Roles.Find(roleId);
+        return await _dbContext.Roles.FindAsync(id);
     }
 
-    public int AddRole(Role role)
+    public async Task<int> AddRole(Role role)
     {
         _dbContext.Roles.Add(role);
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
         return role.Id;
     }
 }

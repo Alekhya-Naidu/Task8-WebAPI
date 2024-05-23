@@ -16,19 +16,19 @@ public class MasterDataRepository : IMasterDataRepository
         _dbContext = dbContext;
     }
 
-    public Location GetLocationFromName(string locationName)
+    public async Task<Location> GetLocationFromName(string locationName)
     {
-        return _dbContext.Locations.FirstOrDefault(l => l.Name == locationName);
+        return await _dbContext.Locations.FirstOrDefaultAsync(l => l.Name == locationName);
     }
 
-    public Department GetDepartmentFromName(string departmentName)
+    public async Task<Department> GetDepartmentFromName(string departmentName)
     {
-        return _dbContext.Departments.FirstOrDefault(d => d.Name == departmentName);
+        return await _dbContext.Departments.FirstOrDefaultAsync(d => d.Name == departmentName);
     }
 
-    public Manager GetManagerFromName(string managerName)
+    public async Task<Manager> GetManagerFromName(string managerName)
     {
-        var managerEmployee = _dbContext.Employees.FirstOrDefault(e => e.FirstName == managerName && e.IsManager);
+        var managerEmployee = await _dbContext.Employees.FirstOrDefaultAsync(e => e.FirstName == managerName && e.IsManager);
         if (managerEmployee != null)
         {
             return new Manager { Id = managerEmployee.Id, FirstName = managerEmployee.FirstName };
@@ -39,8 +39,8 @@ public class MasterDataRepository : IMasterDataRepository
         };
     }
 
-    public Project GetProjectFromName(string projectName)
+    public async Task<Project> GetProjectFromName(string projectName)
     {
-        return _dbContext.Projects.FirstOrDefault(p => p.Name == projectName);
+        return await _dbContext.Projects.FirstOrDefaultAsync(p => p.Name == projectName);
     }
 }

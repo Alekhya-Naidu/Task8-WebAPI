@@ -10,4 +10,5 @@ public partial class Role
     public int Id { get; set; }
     public int? DepartmentId { get; set; }
     public string Name { get; set; } = null!;
+    // public virtual Department? Department { get; set; }
 }

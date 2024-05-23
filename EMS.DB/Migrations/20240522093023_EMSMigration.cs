@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace EMS.DB.Migrations
 {
     /// <inheritdoc />
-    public partial class EMSSetup : Migration
+    public partial class EMSMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -62,11 +64,6 @@ namespace EMS.DB.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Roles_Departments_DepartmentId",
-                        column: x => x.DepartmentId,
-                        principalTable: "Departments",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -75,19 +72,20 @@ namespace EMS.DB.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Uid = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Uid = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DOB = table.Column<DateOnly>(type: "date", nullable: false),
+                    DOB = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MobileNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    JoiningDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    JoiningDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LocationId = table.Column<int>(type: "int", nullable: true),
                     DepartmentId = table.Column<int>(type: "int", nullable: true),
                     RoleId = table.Column<int>(type: "int", nullable: true),
                     IsManager = table.Column<bool>(type: "bit", nullable: false),
                     ManagerId = table.Column<int>(type: "int", nullable: true),
-                    ProjectId = table.Column<int>(type: "int", nullable: true)
+                    ProjectId = table.Column<int>(type: "int", nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -119,6 +117,50 @@ namespace EMS.DB.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.InsertData(
+                table: "Departments",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "HR" },
+                    { 2, "PE" },
+                    { 3, "QA" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Locations",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Hyderabad" },
+                    { 2, "US" },
+                    { 3, "UK" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Projects",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "p1" },
+                    { 2, "p2" },
+                    { 3, "p3" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "DepartmentId", "Name" },
+                values: new object[,]
+                {
+                    { 1, 1, "Administrator" },
+                    { 2, 2, "Manager" },
+                    { 3, 2, "Developer" },
+                    { 4, 2, "Intern" },
+                    { 5, 3, "Manager" },
+                    { 6, 3, "Tester" },
+                    { 7, 3, "Intern" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Employees_DepartmentId",
                 table: "Employees",
@@ -145,9 +187,10 @@ namespace EMS.DB.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Roles_DepartmentId",
-                table: "Roles",
-                column: "DepartmentId");
+                name: "IX_Employees_Uid",
+                table: "Employees",
+                column: "Uid",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -157,6 +200,9 @@ namespace EMS.DB.Migrations
                 name: "Employees");
 
             migrationBuilder.DropTable(
+                name: "Departments");
+
+            migrationBuilder.DropTable(
                 name: "Locations");
 
             migrationBuilder.DropTable(
@@ -164,9 +210,6 @@ namespace EMS.DB.Migrations
 
             migrationBuilder.DropTable(
                 name: "Roles");
-
-            migrationBuilder.DropTable(
-                name: "Departments");
         }
     }
 }

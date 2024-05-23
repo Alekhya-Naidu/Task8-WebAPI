@@ -18,19 +18,19 @@ public class AuthenticationService : IAuthenticationService
         _authenticationRepo = authenticationRepo;
     }
 
-    public int RegisterEmployee(RegisterDTO registerEmp)
+    public async Task<int> RegisterEmployee(RegisterDTO registerEmp)
     {
-        return _authenticationRepo.RegisterEmployee(registerEmp);
+        return await _authenticationRepo.RegisterEmployee(registerEmp);
     }
 
-    public EmployeeDetail GetEmployeeByEmail(string email)
+    public async Task<EmployeeDetail> GetEmployeeByEmail(string email)
     {
-        return _authenticationRepo.GetEmployeeByEmail(email);
+        return await _authenticationRepo.GetEmployeeByEmail(email);
     }
 
-    public bool Authenticate(string email, string password)
+    public async Task<bool> Authenticate(string email, string password)
     {
-        return _authenticationRepo.Authenticate(email, password);
+        return await _authenticationRepo.Authenticate(email, password);
     }
 }
 

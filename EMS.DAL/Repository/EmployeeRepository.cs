@@ -27,54 +27,76 @@ public class EmployeeRepository : IEmployeeRepository
         _mapper = mapper;
     }
 
-    public int Insert(EmployeeDetail employeeDetail)
+    public async Task<int> Insert(EmployeeDetail employeeDetail)
     {
-        var employee = _mapper.MapEmployeeDtoToEmployee(employeeDetail);
-        _dbContext.Employees.Add(employee);
-        _dbContext.SaveChanges();
+        var location = await _masterDataRepo.GetLocationFromName(employeeDetail.LocationName);
+        var department = await _masterDataRepo.GetDepartmentFromName(employeeDetail.DepartmentName);
+        var role = await _rolesRepo.GetRoleFromName(employeeDetail.RoleName);
+        var manager = await _masterDataRepo.GetManagerFromName(employeeDetail.ManagerName);
+        var project = await _masterDataRepo.GetProjectFromName(employeeDetail.ProjectName);
+
+        var employee = _mapper.MapEmployeeDtoToEmployee(location, department, role, manager, project, employeeDetail);
+        await _dbContext.Employees.AddAsync(employee);
+        await _dbContext.SaveChangesAsync();
         return employee.Id;
     }
 
-    public int Update(EmployeeDetail employeeDetail)
+    public async Task<int> Update(EmployeeDetail employeeDetail)
     {
-        var existingEmployee = _dbContext.Employees.Find(employeeDetail.Id);
+        var existingEmployee = await _dbContext.Employees.FindAsync(employeeDetail.Id);
         if (existingEmployee == null)
         {
             return -1;
         }
-        _mapper.MapEmployeeDetailToEmployee(employeeDetail, existingEmployee);
-        _dbContext.SaveChanges();
-        return existingEmployee.Id;
+        var location = await _masterDataRepo.GetLocationFromName(employeeDetail.LocationName);
+        var department = await _masterDataRepo.GetDepartmentFromName(employeeDetail.DepartmentName);
+        var role = await _rolesRepo.GetRoleFromName(employeeDetail.RoleName);
+        var manager = await _masterDataRepo.GetManagerFromName(employeeDetail.ManagerName);
+        var project = await _masterDataRepo.GetProjectFromName(employeeDetail.ProjectName);
+        
+        var updatedEmployee = _mapper.MapEmployeeDtoToExistingEmployee(location, department, role, manager, project, employeeDetail, existingEmployee);
+        await _dbContext.SaveChangesAsync();
+        return updatedEmployee.Id;
     }
 
-    public int UpdateRow(int id, JsonPatchDocument<EmployeeDetail> patchDocument)
+    public async Task<int> UpdateRow(int id, JsonPatchDocument<EmployeeDetail> patchDocument)
     {
-        var employee = GetEmployeeById(id);
-        if (employee == null)
+        var existingEmployee = await _dbContext.Employees.FindAsync(id);
+        if (existingEmployee == null)
         {
             return 0; 
         }
-        patchDocument.ApplyTo(employee);
+        var employeeDetail = _mapper.MapEmployeeToEmployeeDTO(existingEmployee);
 
-        var rowsAffected = Update(employee);
-        return rowsAffected > 0 ? rowsAffected : 0;
+        patchDocument.ApplyTo(employeeDetail);
+
+        var location = await _masterDataRepo.GetLocationFromName(employeeDetail.LocationName);
+        var department = await _masterDataRepo.GetDepartmentFromName(employeeDetail.DepartmentName);
+        var role = await _rolesRepo.GetRoleFromName(employeeDetail.RoleName);
+        var manager = await _masterDataRepo.GetManagerFromName(employeeDetail.ManagerName);
+        var project = await _masterDataRepo.GetProjectFromName(employeeDetail.ProjectName);
+
+        var updatedEmployee = _mapper.MapEmployeeDtoToExistingEmployee(location, department, role, manager, project, employeeDetail, existingEmployee);
+        await _dbContext.SaveChangesAsync();
+        return updatedEmployee.Id;
     }
 
-    public int Delete(int id)
+    public async Task<int> Delete(int id)
     {
-        var employeeToBeDeleted = _dbContext.Employees.Find(id);
+        var employeeToBeDeleted = await _dbContext.Employees.FindAsync(id);
         if(employeeToBeDeleted == null)
         {
             return 0;
         }
         _dbContext.Employees.Remove(employeeToBeDeleted);
-        return _dbContext.SaveChanges();
+        return await _dbContext.SaveChangesAsync();
     }
 
-    public EmployeeDetail GetEmployeeById(int id)
+    public async Task<EmployeeDetail> GetEmployeeById(int id)
     {
-        var existingEmployee = _dbContext.EmployeeDetails
-            .FirstOrDefault(e => e.Id == id);
+        var existingEmployee = await _dbContext.EmployeeDetails
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id == id);
         if (existingEmployee == null)
         {
             return null;
@@ -82,22 +104,18 @@ public class EmployeeRepository : IEmployeeRepository
         return existingEmployee; 
     }
 
-    // public IEnumerable<EmployeeDetail> GetAll()
-    // {
-    //     return _dbContext.EmployeeDetails.ToList();
-    // }
-
-    public PaginatedResult<EmployeeDetail> GetAll(int pageIndex, int pageSize)
+    public async Task<PaginatedResult<EmployeeDetail>> GetAll(int pageIndex, int pageSize)
     {
-        var query = _dbContext.EmployeeDetails.AsQueryable();
-        var totalCount = query.Count();
-        var items = query.Skip((pageIndex - 1) * pageSize)
+        var query = _dbContext.EmployeeDetails.AsQueryable().AsNoTracking();
+        var totalCount = await query.CountAsync();
+        var items = await query.Skip((pageIndex - 1) * pageSize)
                          .Take(pageSize)
-                         .ToList();
+                         .ToListAsync();
 
         return new PaginatedResult<EmployeeDetail>(items, pageIndex, pageSize, totalCount);
     }
-    public IEnumerable<EmployeeDetail> Filter(EmployeeFilter filter)
+    
+    public async Task<IEnumerable<EmployeeDetail>> Filter(EmployeeFilter filter)
     {
         var query = _dbContext.Employees.AsQueryable();
         if (filter.Id.HasValue)
@@ -110,7 +128,7 @@ public class EmployeeRepository : IEmployeeRepository
         }
         if (!string.IsNullOrEmpty(filter.LocationName))
         {
-            var location = _masterDataRepo.GetLocationFromName(filter.LocationName);
+            var location = await _masterDataRepo.GetLocationFromName(filter.LocationName);
             if (location != null)
             {
                 query = query.Where(e => e.LocationId == location.Id);
@@ -118,18 +136,18 @@ public class EmployeeRepository : IEmployeeRepository
         }
         if (!string.IsNullOrEmpty(filter.DepartmentName))
         {
-            var department = _masterDataRepo.GetDepartmentFromName(filter.DepartmentName);
+            var department = await _masterDataRepo.GetDepartmentFromName(filter.DepartmentName);
             if (department != null)
             {
                 query = query.Where(e => e.DepartmentId == department.Id);
             }
         }
-        var employees = query.Include(e => e.Location)
+        var employees = await query.Include(e => e.Location)
                              .Include(e => e.Department)
                              .Include(e => e.Role)
                              .Include(e => e.Project)
                              .Include(e => e.Manager)
-                             .ToList();
+                             .ToListAsync();
 
         return employees
             .Select(emp => _mapper.MapEmployeeToEmployeeDTO(emp)).ToList();

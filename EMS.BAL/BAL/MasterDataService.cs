@@ -14,23 +14,23 @@ public class MasterDataService : IMasterDataService
         _masterDataRepo = masterDataRepo;
     }
 
-    public Location GetLocationFromName(string locationName)
+    public async Task<Location> GetLocationFromName(string locationName)
     {
-        return _masterDataRepo.GetLocationFromName(locationName);
+        return await _masterDataRepo.GetLocationFromName(locationName);
     }
 
-    public Department GetDepartmentFromName(string departmentName)
+    public async Task<Department> GetDepartmentFromName(string departmentName)
     {
-        return _masterDataRepo.GetDepartmentFromName(departmentName);
+        return await _masterDataRepo.GetDepartmentFromName(departmentName);
     }
 
-    public Manager GetManagerFromName(string managerName)
+    public async Task<Manager> GetManagerFromName(string managerName)
     {
-        return _masterDataRepo.GetManagerFromName(managerName);
+        return await _masterDataRepo.GetManagerFromName(managerName);
     }
 
-    public Project GetProjectFromName(string projectName)
+    public async Task<Project> GetProjectFromName(string projectName)
     {
-        return _masterDataRepo.GetProjectFromName(projectName);
+        return await _masterDataRepo.GetProjectFromName(projectName);
     }
 }

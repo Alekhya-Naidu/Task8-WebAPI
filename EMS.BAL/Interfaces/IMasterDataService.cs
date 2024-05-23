@@ -8,8 +8,8 @@ namespace EMS.BAL.Interfaces;
 
 public interface IMasterDataService
 {
-    Location GetLocationFromName(string locationName);
-    Department GetDepartmentFromName(string departmentName);
-    Manager GetManagerFromName(string managerName);
-    Project GetProjectFromName(string projectName);
+    Task<Location> GetLocationFromName(string locationName);
+    Task<Department> GetDepartmentFromName(string departmentName);
+    Task<Manager> GetManagerFromName(string managerName);
+    Task<Project> GetProjectFromName(string projectName);
 }

@@ -6,8 +6,8 @@ namespace EMS.BAL.Interfaces;
 
 public interface IRolesService
 {
-    IEnumerable<Role> GetAllRoles();
-    Role GetRoleFromName(string roleName);
-    Role GetRoleById(int roleId);
-    int AddRole(Role role);
+    Task<IEnumerable<Role>> GetAllRoles();
+    Task<Role> GetRoleFromName(string roleName);
+    Task<Role> GetRoleById(int id);
+    Task<int> AddRole(Role role);
 }

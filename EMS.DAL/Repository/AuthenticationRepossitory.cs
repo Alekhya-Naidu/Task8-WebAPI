@@ -15,40 +15,54 @@ namespace EMS.DAL.Repository;
 public class AuthenticationRepository : IAuthenticationRepository
 {
     private readonly EMSDbContext _dbContext;
+    private readonly IMasterDataRepository _masterDataRepo;
+    private readonly IRolesRepository _rolesRepo;
     private readonly EmployeeMapper _mapper;
 
-    public AuthenticationRepository(EMSDbContext dbContext, EmployeeMapper mapper)
+    public AuthenticationRepository(EMSDbContext dbContext,IMasterDataRepository masterDataRepo, IRolesRepository rolesRepo, EmployeeMapper mapper)
     {
         _dbContext = dbContext;
+        _masterDataRepo = masterDataRepo;
+        _rolesRepo = rolesRepo;
         _mapper = mapper;
     }
 
-    public int RegisterEmployee(RegisterDTO registerEmp)
-    {
+    public async Task<int> RegisterEmployee(RegisterDTO registerEmp)
+    {   
+        var location = await _masterDataRepo.GetLocationFromName(registerEmp.LocationName);
+        var department = await _masterDataRepo.GetDepartmentFromName(registerEmp.DepartmentName);
+        var role = await _rolesRepo.GetRoleFromName(registerEmp.RoleName);
+        var manager = await _masterDataRepo.GetManagerFromName(registerEmp.ManagerName);
+        var project = await _masterDataRepo.GetProjectFromName(registerEmp.ProjectName);
         string hashedPassword = HashPassword(registerEmp.Password);
-        var employee = _mapper.MapRegisterDtoToEmployee(registerEmp, hashedPassword);
+
+        var employee = _mapper.MapRegisterDtoToEmployee(location,department, role, manager, project, registerEmp, hashedPassword);
         
-        _dbContext.Employees.Add(employee);
-        _dbContext.SaveChanges();
+        await _dbContext.Employees.AddAsync(employee);
+        await _dbContext.SaveChangesAsync();
         return employee.Id;
     }
 
-    public EmployeeDetail GetEmployeeByEmail(string email)
+    public async Task<EmployeeDetail> GetEmployeeByEmail(string email)
     {
-        var employee = _dbContext.Employees
+        var employee = await _dbContext.Employees
                 .Include(e => e.Location)
                 .Include(e => e.Department)
                 .Include(e => e.Role)
                 .Include(e => e.Manager)
                 .Include(e => e.Project)
-                .FirstOrDefault(e => e.Email == email);
+                .FirstOrDefaultAsync(e => e.Email == email);
 
         return employee != null ? _mapper.MapEmployeeToEmployeeDTO(employee) : null;
     }
 
-    public bool Authenticate(string email, string password)
+    public async Task<bool> Authenticate(string email, string password)
     {
-        var employee = _dbContext.Employees.FirstOrDefault(e => e.Email == email);
+        var employee = await _dbContext.Employees.FirstOrDefaultAsync(e => e.Email == email);
+        if (employee == null)
+        {
+            return false;
+        }
         return VerifyPassword(password, employee.Password);
     }
     

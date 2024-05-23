@@ -8,11 +8,11 @@ namespace EMS.BAL.Interfaces;
 
 public interface IEmployeeService
 {
-    int Insert(EmployeeDetail employeeDetail);
-    int Update(EmployeeDetail employeeDetail);
-    int UpdateRow(int id, JsonPatchDocument<EmployeeDetail> patchDocument);
-    int Delete(int id);
-    EmployeeDetail GetEmployeeById(int id);
-    PaginatedResult<EmployeeDetail> GetAll(int pageIndex, int pageSize);
-    IEnumerable<EmployeeDetail> Filter(EmployeeFilter filters);
+    Task<int> Insert(EmployeeDetail employeeDetail);
+    Task<int> Update(EmployeeDetail employeeDetail);
+    Task<int> UpdateRow(int id, JsonPatchDocument<EmployeeDetail> patchDocument);
+    Task<int> Delete(int id);
+    Task<EmployeeDetail> GetEmployeeById(int id);
+    Task<PaginatedResult<EmployeeDetail>> GetAll(int pageIndex, int pageSize);
+    Task<IEnumerable<EmployeeDetail>> Filter(EmployeeFilter filters);
 }

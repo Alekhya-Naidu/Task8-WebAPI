@@ -18,38 +18,38 @@ public class EmployeeService : IEmployeeService
         _employeeRepo = employeeRepo;
     }
 
-    public int Insert(EmployeeDetail employeeDetail)
+    public async Task<int> Insert(EmployeeDetail employeeDetail)
     {
-        return _employeeRepo.Insert(employeeDetail);
+        return await _employeeRepo.Insert(employeeDetail);
     }
 
-    public int Update (EmployeeDetail employeeDetail)   
+    public async Task<int> Update (EmployeeDetail employeeDetail)   
     {
-        return _employeeRepo.Update(employeeDetail);
+        return await _employeeRepo.Update(employeeDetail);
     }
 
-    public int UpdateRow(int id, JsonPatchDocument<EmployeeDetail> patchDocument)
+    public async Task<int> UpdateRow(int id, JsonPatchDocument<EmployeeDetail> patchDocument)
     {
-        return _employeeRepo.UpdateRow(id, patchDocument);
+        return await _employeeRepo.UpdateRow(id, patchDocument);
     }
 
-    public int Delete (int id)
+    public async Task<int> Delete (int id)
     {
-        return _employeeRepo.Delete(id);
+        return await _employeeRepo.Delete(id);
     }
 
-    public EmployeeDetail GetEmployeeById(int id)
+    public async Task<EmployeeDetail> GetEmployeeById(int id)
     {
-        return _employeeRepo.GetEmployeeById(id);
+        return await _employeeRepo.GetEmployeeById(id);
     }
     
-    public PaginatedResult<EmployeeDetail> GetAll(int pageIndex, int pageSize)
+    public async Task<PaginatedResult<EmployeeDetail>> GetAll(int pageIndex, int pageSize)
     {
-        return _employeeRepo.GetAll(pageIndex, pageSize);
+        return await _employeeRepo.GetAll(pageIndex, pageSize);
     }
 
-    public IEnumerable<EmployeeDetail> Filter(EmployeeFilter filters)
+    public async Task<IEnumerable<EmployeeDetail>> Filter(EmployeeFilter filters)
     {
-        return _employeeRepo.Filter(filters);
+        return await _employeeRepo.Filter(filters);
     }
 }

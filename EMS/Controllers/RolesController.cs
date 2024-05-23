@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using EMS.BAL.Interfaces;
 using EMS.DB.Models;
 using EMS.ResponseModel.Enums;
@@ -13,49 +14,75 @@ namespace EMS.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-
 public class RolesController : ControllerBase
 {
     private readonly IRolesService _rolesService;
+    private readonly ILogger<RolesController> _logger;
 
-    public RolesController(IRolesService rolesService)
+    public RolesController(IRolesService rolesService, ILogger<RolesController> logger)
     {
         _rolesService = rolesService;
+        _logger = logger;
     }
 
     [HttpGet]
-    public ApiResponse<IEnumerable<Role>> GetAllRoles()
+    public async Task<ApiResponse<IEnumerable<Role>>> GetAllRoles()
     {
-        var roles = _rolesService.GetAllRoles();
-        if (roles == null || !roles.Any())
+        try
         {
-            return new ApiResponse<IEnumerable<Role>>(ResponseStatus.Error, null, ErrorCode.NotFound);
+            var roles = await _rolesService.GetAllRoles();
+            if (roles == null || !roles.Any())
+            {
+                return new ApiResponse<IEnumerable<Role>>(ResponseStatus.Error, null, ErrorCode.NotFound);
+            }
+            return new ApiResponse<IEnumerable<Role>>(ResponseStatus.Success, roles);
         }
-        return new ApiResponse<IEnumerable<Role>>(ResponseStatus.Success, roles);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching all roles");
+            return new ApiResponse<IEnumerable<Role>>(ResponseStatus.Error, null, ErrorCode.InternalServerError);
+        }
     }
 
     [HttpGet("{id}")]
-    public ApiResponse<Role> GetRoleById(int id)
+    public async Task<ApiResponse<Role>> GetRole(int id)
     {
-        var role = _rolesService.GetRoleById(id);
-        if (role == null)
+        try
         {
-            return new ApiResponse<Role>(ResponseStatus.Error, null, ErrorCode.NotFound);
+            var role = await _rolesService.GetRoleById(id);
+            if (role == null)
+            {
+                return new ApiResponse<Role>(ResponseStatus.Error, null, ErrorCode.NotFound);
+            }
+            return new ApiResponse<Role>(ResponseStatus.Success, role);
         }
-        return new ApiResponse<Role>(ResponseStatus.Success, role);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching a role");
+            return new ApiResponse<Role>(ResponseStatus.Error, null, ErrorCode.InternalServerError);
+        }
     }
 
+    [Authorize(Roles="Administrator")]
     [HttpPost]
-    public ApiResponse<int> CreateRole(Role role)
+    public async Task<ApiResponse<int>> CreateRole(Role role)
     {
-        var roleId = _rolesService.AddRole(role);
-        if (roleId > 0)
+        try
         {
-            return new ApiResponse<int>(ResponseStatus.Success, roleId);
+            var roleId = await _rolesService.AddRole(role);
+            if (roleId > 0)
+            {
+                return new ApiResponse<int>(ResponseStatus.Success, roleId);
+            }
+            else
+            {
+                return new ApiResponse<int>(ResponseStatus.Error, 0, ErrorCode.BadRequest);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            return new ApiResponse<int>(ResponseStatus.Error, 0, ErrorCode.BadRequest);
+            _logger.LogError(ex, "Error occurred while creating Role");
+            return new ApiResponse<int>(ResponseStatus.Error, 0, ErrorCode.InternalServerError);
         }
     }
 }

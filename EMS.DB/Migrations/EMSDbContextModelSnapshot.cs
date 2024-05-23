@@ -18,6 +18,9 @@ namespace EMS.DB.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -37,6 +40,23 @@ namespace EMS.DB.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Departments");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "HR"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "PE"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "QA"
+                        });
                 });
 
             modelBuilder.Entity("EMS.DB.Models.Employee", b =>
@@ -81,7 +101,6 @@ namespace EMS.DB.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ProjectId")
@@ -92,7 +111,7 @@ namespace EMS.DB.Migrations
 
                     b.Property<string>("Uid")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -105,6 +124,9 @@ namespace EMS.DB.Migrations
                     b.HasIndex("ProjectId");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("Uid")
+                        .IsUnique();
 
                     b.ToTable("Employees");
                 });
@@ -126,7 +148,8 @@ namespace EMS.DB.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsManager")
                         .HasColumnType("bit");
@@ -136,7 +159,8 @@ namespace EMS.DB.Migrations
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("LocationName")
                         .HasColumnType("nvarchar(max)");
@@ -179,6 +203,23 @@ namespace EMS.DB.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Locations");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Hyderabad"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "US"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "UK"
+                        });
                 });
 
             modelBuilder.Entity("EMS.DB.Models.Project", b =>
@@ -196,6 +237,23 @@ namespace EMS.DB.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Projects");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "p1"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "p2"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "p3"
+                        });
                 });
 
             modelBuilder.Entity("EMS.DB.Models.Role", b =>
@@ -216,6 +274,50 @@ namespace EMS.DB.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DepartmentId = 1,
+                            Name = "Administrator"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DepartmentId = 2,
+                            Name = "Manager"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DepartmentId = 2,
+                            Name = "Developer"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DepartmentId = 2,
+                            Name = "Intern"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DepartmentId = 3,
+                            Name = "Manager"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            DepartmentId = 3,
+                            Name = "Tester"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            DepartmentId = 3,
+                            Name = "Intern"
+                        });
                 });
 
             modelBuilder.Entity("EMS.DB.Models.Employee", b =>

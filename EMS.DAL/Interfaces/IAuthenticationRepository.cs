@@ -7,7 +7,7 @@ namespace EMS.DAL.Interfaces;
 
 public interface IAuthenticationRepository
 {
-    int RegisterEmployee(RegisterDTO registerEmp);
-    EmployeeDetail GetEmployeeByEmail(string email);
-    bool Authenticate(string email, string password);
+    Task<int> RegisterEmployee(RegisterDTO registerEmp);
+    Task<EmployeeDetail> GetEmployeeByEmail(string email);
+    Task<bool> Authenticate(string email, string password);
 }

@@ -10,22 +10,8 @@ namespace EMS.DAL.Mapper;
 
 public class EmployeeMapper
 {
-    private readonly IMasterDataRepository _masterDataRepo;
-    private readonly IRolesRepository _rolesRepo;
-
-    public EmployeeMapper(IMasterDataRepository masterDataRepo, IRolesRepository rolesRepo)
+    public Employee MapEmployeeDtoToEmployee(Location location, Department department, Role role, Manager manager, Project project, EmployeeDetail employeeDetail)
     {
-        _masterDataRepo = masterDataRepo;
-        _rolesRepo = rolesRepo;
-    }
-
-    public Employee MapEmployeeDtoToEmployee(EmployeeDetail employeeDetail)
-    {
-        var location = _masterDataRepo.GetLocationFromName(employeeDetail.LocationName);
-        var department = _masterDataRepo.GetDepartmentFromName(employeeDetail.DepartmentName);
-        var role = _rolesRepo.GetRoleFromName(employeeDetail.RoleName);
-        var manager = _masterDataRepo.GetManagerFromName(employeeDetail.ManagerName);
-        var project = _masterDataRepo.GetProjectFromName(employeeDetail.ProjectName);
         var employee = new Employee
         {
             Uid = employeeDetail.Uid,
@@ -53,13 +39,8 @@ public class EmployeeMapper
         return employee;
     }
 
-    public Employee MapRegisterDtoToEmployee(RegisterDTO registerEmp, string hashedPassword)
+    public Employee MapRegisterDtoToEmployee(Location location, Department department, Role role, Manager manager, Project project, RegisterDTO registerEmp, string hashedPassword)
     {
-        var location = _masterDataRepo.GetLocationFromName(registerEmp.LocationName);
-        var department = _masterDataRepo.GetDepartmentFromName(registerEmp.DepartmentName);
-        var role = _rolesRepo.GetRoleFromName(registerEmp.RoleName);
-        var manager = _masterDataRepo.GetManagerFromName(registerEmp.ManagerName);
-        var project = _masterDataRepo.GetProjectFromName(registerEmp.ProjectName);
         var employee = new Employee
         {
             Uid = registerEmp.Uid,
@@ -80,7 +61,7 @@ public class EmployeeMapper
         return employee;
     }
 
-    public void MapEmployeeDetailToEmployee(EmployeeDetail employeeDetail, Employee employee)
+    public Employee MapEmployeeDtoToExistingEmployee(Location location, Department department, Role role, Manager manager, Project project, EmployeeDetail employeeDetail, Employee employee)
     {
         employee.Uid = employeeDetail.Uid;
         employee.FirstName = employeeDetail.FirstName;
@@ -89,23 +70,13 @@ public class EmployeeMapper
         employee.Email = employeeDetail.Email;
         employee.MobileNumber = employeeDetail.MobileNumber;
         employee.JoiningDate = employeeDetail.JoiningDate;
-
-        var location = _masterDataRepo.GetLocationFromName(employeeDetail.LocationName);
         employee.LocationId = location?.Id;
-
-        var department = _masterDataRepo.GetDepartmentFromName(employeeDetail.DepartmentName);
         employee.DepartmentId = department?.Id;
-
-        var role = _rolesRepo.GetRoleFromName(employeeDetail.RoleName);
         employee.RoleId = role?.Id;
-
         employee.IsManager = employeeDetail.IsManager;
-
-        var manager = _masterDataRepo.GetManagerFromName(employeeDetail.ManagerName);
         employee.ManagerId = employeeDetail.IsManager ? null : manager?.Id;
-
-        var project = _masterDataRepo.GetProjectFromName(employeeDetail.ProjectName);
         employee.ProjectId = project?.Id;
+        return employee;
     }    
     
     public EmployeeDetail MapEmployeeToEmployeeDTO(Employee employee)

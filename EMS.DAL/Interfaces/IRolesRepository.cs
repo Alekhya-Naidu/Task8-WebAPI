@@ -6,8 +6,8 @@ namespace EMS.DAL.Interfaces;
 
 public interface IRolesRepository
 {
-    IEnumerable<Role> GetAllRoles();
-    Role GetRoleFromName(string rolenNme);
-    Role GetRoleById(int roleId);
-    int AddRole(Role role);
+    Task<IEnumerable<Role>> GetAllRoles();
+    Task<Role> GetRoleFromName(string rolenNme);
+    Task<Role> GetRoleById(int id);
+    Task<int> AddRole(Role role);
 }
